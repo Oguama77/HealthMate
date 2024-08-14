@@ -69,7 +69,7 @@ with col1:
 # Set the title of the app
 with col2:
     st.title("Health Mate")
-    st.write("A Product of Advantage Health Africa")
+    st.write("Your Digital Health AI Assistant")
 st.write("")
 st.write("")
 
