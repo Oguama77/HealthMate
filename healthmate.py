@@ -24,13 +24,9 @@ prompt = ChatPromptTemplate.from_messages(
             "system",
             master_prompt,
         ),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
+        MessagesPlaceholder(variable_name = "messages"),
     ]
 )
-
-
-store = {}
 
 
 def get_session_history(session_id: str) -> BaseChatMessageHistory:
@@ -38,17 +34,13 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
         store[session_id] = ChatMessageHistory()
     return store[session_id]
 
-model = ChatOpenAI(model="gpt-4o-mini", openai_api_key = st.secrets.OPENAI_API_KEY)
+
+model = ChatOpenAI(model="gpt-4o-mini", openai_api_key = "sk-proj-L4DtwUTMu81P7IarYJovT3BlbkFJnVHX5wfU3T7LZZv1KTTO")
 
 chain = prompt | model
 
-with_message_history = RunnableWithMessageHistory(
-    chain, 
-    get_session_history, 
-    input_messages_key="input",
-    history_messages_key="chat_history",
-    output_messages_key="answer",
-)
+store = {}
+
 
 
 # Streamlit app setup
@@ -73,23 +65,25 @@ with col2:
 st.write("")
 st.write("")
 
-# Function to generate answers
-def answer_question(prompt, session_id):
-    # Update: Pass the session_id in config
-    result = with_message_history.invoke(
-        {"input": [HumanMessage(content=prompt)]},
-        config={"configurable": {"session_id": session_id}}
-    )
-    return result.content  # Extract the answer from the result
 
 
 
 # Streamlit app logic
+if 'store' not in st.session_state:
+    st.session_state['store'] = {}
+
+if 'with_message_history' not in st.session_state:
+    st.session_state['with_message_history'] = RunnableWithMessageHistory(chain, get_session_history, input_messages_key= "messages")
+
 if 'session_id' not in st.session_state:
     st.session_state['session_id'] = str(os.urandom(16))  # Unique session ID for chat history
 
+if 'config' not in st.session_state:
+    st.session_state['config'] = {"configurable": {"session_id": st.session_state['session_id']}}
+
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []  # Store the chat history
+
 
 # Display chat history
 def display_chat_history():
@@ -123,8 +117,16 @@ display_chat_history()
 
 st.write("---")  # Divider lin
 
+
+
+
 if st_prompt:
-    answer = answer_question(st_prompt, st.session_state['session_id'])
+
+    result = st.session_state.with_message_history.invoke(
+        {"messages": [HumanMessage(content=st_prompt)]},
+        config= st.session_state.config,
+    )
+    answer = result.content
     with st.chat_message("user", avatar="🧑"):
             st.write(st_prompt)
     with st.chat_message("assistant", avatar="🧑‍⚕️"):
