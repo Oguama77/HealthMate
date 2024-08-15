@@ -35,7 +35,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     return store[session_id]
 
 
-model = ChatOpenAI(model="gpt-4o-mini", openai_api_key = "sk-proj-L4DtwUTMu81P7IarYJovT3BlbkFJnVHX5wfU3T7LZZv1KTTO")
+model = ChatOpenAI(model="gpt-4o-mini", openai_api_key = st.secrets.OPENAI_API_KEY)
 
 chain = prompt | model
 
