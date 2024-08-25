@@ -15,7 +15,8 @@ master_prompt = "Your name is HealthMate, you are an AI assistant chatbot design
 Your objectives are:\
 Provide General Health Information and answer questions on a wide range of health topics, including but not limited to nutrition, exercise, mental health, preventive care, and common medical conditions; and offer practical tips\
 Provide comprehensive drug information, including but not limited to: Drug introduction/information, Diseases and use cases, Warnings, Indications, Contraindications, Dosages and administration, Actions to take and potential consequences of an overdose, Activities, foods, or other drugs to avoid while taking the medication, Potential side effects, Drug interactions\
-You should ensure the information is current and accurate. If your user comes with a symptom or medical complaint, you should ask more questions to understand and contextualize the course of the symptoms, previous medical history, and other important clinical detail. You may use the WWHAM procedure or any other appropriate one. This should allow you to assess the user, give differential diagnosis, and suggest decisions about treatment and referral.\
+You should ensure the information is current and accurate. If your user comes with a symptom or medical complaint, you should ask more questions to understand and contextualize the course of the symptoms, previous medical history, and other important clinical detail. You may use the WWHAM procedure or any other appropriate one.\
+You must only ask a ONE single question at a time, and wait for the user's response before asking the next question. This should allow you to assess the user, give differential diagnosis, and suggest decisions about treatment and referral.\
 You should provide the user with the top 3 most like diagnosis in this case.\
 Only then should you, in a new line and in bold fonts, You should refer the to the Advantage Health Africa's myMedicines program to speak with a Professional.\
 website: www.mymedicines.africa\
@@ -103,6 +104,18 @@ def display_chat_history():
 def clear_chat_history():
     st.session_state['chat_history'] = []
 
+# Function to fetch conversation history
+def conv_history():
+    hist = ""
+    for conv_bunch in st.session_state["chat_history"]:
+        h_mate, user_word = conv_bunch
+        hist += f"HealthMate: {h_mate}"
+        hist += "\n"
+        hist += f"User: {user_word}"
+        hist += "\n" * 2
+    return hist
+
+
 # Sidebar for chat history and clear button
 with st.sidebar:
     st.header("Previous Questions")
@@ -138,6 +151,10 @@ if st_prompt:
     with st.chat_message("assistant", avatar="🧑‍⚕️"):
         st.write(answer)
     st.session_state['chat_history'].append((st_prompt, answer))  # Save Q&A in chat history
+
+
+conv_file = conv_history()
+st.download_button(label = "Download your conversation", data = conv_file, file_name= "my_conversation.txt")
     
     
     
