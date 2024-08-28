@@ -92,6 +92,28 @@ if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []  # Store the chat history
 
 
+# Suggested questions
+suggested_questions = [
+    {"emoji": "🩺", "text": "What causes peptic ulcer?"},
+    {"emoji": "💊", "text": "Tell me about Ibuprofen"},
+    {"emoji": "🤒", "text": "Why does it burn when I pee?"}
+]
+
+# Create columns for the suggestion buttons
+cols = st.columns(len(suggested_questions))
+
+# Display suggested question buttons side by side
+for idx, question in enumerate(suggested_questions):
+    with cols[idx]:
+        if st.button(f"{question['emoji']} {question['text']}"):
+            st.session_state['chat_history'].append((question['text'], ""))  # Add the question text to chat history
+            result = st.session_state.with_message_history.invoke(
+                {"messages": [HumanMessage(content=question['text'])]},
+                config=st.session_state.config,
+            )
+            answer = result.content
+            st.session_state['chat_history'][-1] = (question['text'], answer)
+            
 # Display chat history
 def display_chat_history():
     for user_message, bot_response in st.session_state['chat_history']:
