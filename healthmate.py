@@ -64,8 +64,8 @@ col1, col2= st.columns([1, 2])
 
 # Adding elements to the first column
 with col1:
-    logo_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc-x18rcb_e5GobxQwhqRKlv73iBJqUFWgFw&s.png"
-    st.image(logo_url, width=60)
+    logo_path = aha_logo.png
+    st.image(logo_path, width=60)
     
 # Adding elements to the second column
 # Set the title of the app
@@ -144,8 +144,7 @@ def create_pdf_with_logo(buffer, text_content):
     story = []
     
     # Add the company logo (optional)
-    logo_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc-x18rcb_e5GobxQwhqRKlv73iBJqUFWgFw&s.png"
-    logo = Image(logo_url, width=50, height=50)
+    logo = Image(logo_path, width=50, height=50)
     story.append(logo)
     story.append(Spacer(1, 12))  # Space between logo and text
     
