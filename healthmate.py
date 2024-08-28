@@ -1,14 +1,17 @@
+from io import BytesIO
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.chat_history import (
-    BaseChatMessageHistory,
-    InMemoryChatMessageHistory,
+    BaseChatMessageHistory
 )
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 import streamlit as st
 from streamlit_chat import message
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 import os
 
 master_prompt = "Your name is HealthMate, you are an AI assistant chatbot designed to provide information and answer questions on general health. You are also capable of providing extensive drug information for semi-professionals. You should utilize your PubMed tool to access accurate and up-to-date health and drug information when prompted by users. You should be able to hold a normal conversation, maintain a warm and friendly demeanor, and offer health advice to users.\
@@ -16,12 +19,12 @@ Your objectives are:\
 Provide General Health Information and answer questions on a wide range of health topics, including but not limited to nutrition, exercise, mental health, preventive care, and common medical conditions; and offer practical tips\
 Provide comprehensive drug information, including but not limited to: Drug introduction/information, Diseases and use cases, Warnings, Indications, Contraindications, Dosages and administration, Actions to take and potential consequences of an overdose, Activities, foods, or other drugs to avoid while taking the medication, Potential side effects, Drug interactions\
 You should ensure the information is current and accurate. If your user comes with a symptom or medical complaint, you should ask more questions to understand and contextualize the course of the symptoms, previous medical history, and other important clinical detail. You may use the WWHAM procedure or any other appropriate one.\
-You must only ask a ONE single question at a time, and wait for the user's response before asking the next question. This should allow you to assess the user, give differential diagnosis, and suggest decisions about treatment and referral.\
-You should provide the user with the top 3 most like diagnosis in this case.\
-Only then should you, in a new line and in bold fonts, You should refer the to the Advantage Health Africa's myMedicines program to speak with a Professional.\
+You must only ask ONE question at a time, and wait for the user's response before asking the next question. This should allow you to assess the user, give differential diagnosis, and suggest decisions about treatment and referral.\
+You should provide the user with the top 3 most likely diagnoses in this case.\
+Only then should you, in a new line and in bold fonts, You should refer them to the Advantage Health Africa's myMedicines program to speak with a Professional.\
 website: www.mymedicines.africa\
 telephone: +2348082751466\
-Generally, You should provide appropriate health advice based on the user's questions and concerns. You should ensure you maintain a warm, friendly, and approachable tone in all interactions. You should be empathetic and considerate when addressing users' health concerns.\
+Generally, You should provide appropriate health advice based on the user's questions and concerns. You should ensure that you maintain a warm, friendly, and approachable tone in all interactions. You should be empathetic and considerate when addressing users' health concerns.\
 Remind users that while HealthMate can provide valuable information and advice, it is not a substitute for professional medical advice, diagnosis, or treatment. On \
 Make sure your responses are concise and ensure your responses do not exceed 200 words"
 
@@ -130,12 +133,34 @@ def clear_chat_history():
 def conv_history():
     hist = ""
     for conv_bunch in st.session_state["chat_history"]:
-        h_mate, user_word = conv_bunch
-        hist += f"HealthMate: {h_mate}"
-        hist += "\n"
-        hist += f"User: {user_word}"
-        hist += "\n" * 2
+        user_word, h_mate = conv_bunch
+        hist += f"User: {user_word}\n"
+        hist += f"HealthMate: {h_mate}\n\n"
     return hist
+
+# Function to generate a PDF with the conversation history and write it directly to the buffer
+def create_pdf_with_logo(buffer, text_content):
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    story = []
+    
+    # Add the company logo (optional)
+    logo_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc-x18rcb_e5GobxQwhqRKlv73iBJqUFWgFw&s.png"
+    logo = Image(logo_url, width=50, height=50)
+    story.append(logo)
+    story.append(Spacer(1, 12))  # Space between logo and text
+    
+    # Add the conversation history text
+    styles = getSampleStyleSheet()
+    conversation_text = text_content.split("\n")
+    
+    for line in conversation_text:
+        if line.strip():  # Add only non-empty lines
+            paragraph = Paragraph(line, styles['Normal'])
+            story.append(paragraph)
+            story.append(Spacer(1, 12))  # Add space between each paragraph
+    
+    # Build the PDF and write it to the buffer
+    doc.build(story)
 
 
 # Sidebar for chat history and clear button
@@ -175,8 +200,23 @@ if st_prompt:
     st.session_state['chat_history'].append((st_prompt, answer))  # Save Q&A in chat history
 
 
+# Generate the conversation history as text
 conv_file = conv_history()
-st.download_button(label = "Download your conversation", data = conv_file, file_name= "my_conversation.txt")
+
+# Generate the PDF in-memory
+pdf_buffer = BytesIO()
+create_pdf_with_logo(pdf_buffer, conv_file)
+
+# Set buffer's position to the start
+pdf_buffer.seek(0)
+
+# Create the download button for the PDF
+st.download_button(
+    label="Download conversation", 
+    data=pdf_buffer, 
+    file_name="healthmate_conversation.pdf", 
+    mime="application/pdf"
+)
     
     
     
