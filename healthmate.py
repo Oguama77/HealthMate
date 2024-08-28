@@ -64,7 +64,7 @@ col1, col2= st.columns([1, 2])
 
 # Adding elements to the first column
 with col1:
-    logo_path = aha_logo.png
+    logo_path = "aha_logo.png"
     st.image(logo_path, width=60)
     
 # Adding elements to the second column
