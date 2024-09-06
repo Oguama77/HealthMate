@@ -67,6 +67,8 @@ Worm Infestation\
 Hematinic/ routine medicines for pregnant women\
 I want to access care via myAdvantage?\
 Yes, contact the myAdvantage via whatsapp on +2349139376140\
+How do I sign up for myAdvantage?\
+Visit www.myadvantage.africa\
 Does myAdvantage cover prescription only medications (POM)?\
 Not yet. We do not cover prescription only medications (POM) right now, but our users will be notified once we roll-out cover for POM.\
 However, if you have a prescription outside these covered common ailments, you can have it filled/delivered to your doorstep by myMedicines. contact: +2348082751466 (www.mymedicines.africa)\
